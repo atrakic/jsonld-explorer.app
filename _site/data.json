@@ -1,0 +1,178 @@
+{
+    "@context": [
+        "https://schema.org",
+        {
+            "csvw": "https://www.w3.org/ns/csvw#"
+        }
+    ],
+    "@type": "Dataset",
+    "name": "Demo - Earthquakes in Europe",
+    "description": "Demo dataset of seismic activity across Europe, including earthquake locations, magnitudes, depths, and temporal data. This dataset provides valuable information for researchers, emergency planners, and scientists studying seismic patterns and risks in the European region.",
+    "publisher": {
+        "@type": "Organization",
+        "name": "European-Mediterranean Seismological Centre"
+    },
+    "spatialCoverage": {
+        "@type": "Place",
+        "name": "Europe"
+    },
+    "temporalCoverage": "2020/2025",
+    "hasPart": [
+        {
+            "@type": "Dataset",
+            "name": "Central Europe Seismic Events 2024",
+            "description": "Detailed records of earthquakes in Central Europe during 2024, including data from Germany, Austria, Switzerland, and surrounding regions.",
+            "identifier": "central-europe-2024",
+            "temporalCoverage": "2024"
+        },
+        {
+            "@type": "Dataset",
+            "name": "Mediterranean Seismic Activity 2023-2024",
+            "description": "Comprehensive earthquake data from the Mediterranean region, covering Italy, Greece, Turkey, and nearby areas with magnitude 3.0 and above.",
+            "identifier": "mediterranean-2023-2024",
+            "temporalCoverage": "2023/2024"
+        }
+    ],
+    "mainEntity": {
+        "@type": "csvw:Table",
+        "csvw:tableSchema": {
+            "csvw:columns": [
+                {
+                    "csvw:name": "Date",
+                    "csvw:datatype": "date",
+                    "csvw:cells": [
+                        {
+                            "csvw:value": "2024-03-15",
+                            "csvw:primaryKey": "eq001"
+                        },
+                        {
+                            "csvw:value": "2024-06-22",
+                            "csvw:primaryKey": "eq002"
+                        },
+                        {
+                            "csvw:value": "2024-08-10",
+                            "csvw:primaryKey": "eq003"
+                        },
+                        {
+                            "csvw:value": "2024-09-05",
+                            "csvw:primaryKey": "eq004"
+                        },
+                        {
+                            "csvw:value": "2024-11-18",
+                            "csvw:primaryKey": "eq005"
+                        }
+                    ]
+                },
+                {
+                    "csvw:name": "Location",
+                    "csvw:datatype": "string",
+                    "csvw:cells": [
+                        {
+                            "csvw:value": "Central Italy",
+                            "csvw:primaryKey": "eq001"
+                        },
+                        {
+                            "csvw:value": "Western Greece",
+                            "csvw:primaryKey": "eq002"
+                        },
+                        {
+                            "csvw:value": "Southern Turkey",
+                            "csvw:primaryKey": "eq003"
+                        },
+                        {
+                            "csvw:value": "Eastern Romania",
+                            "csvw:primaryKey": "eq004"
+                        },
+                        {
+                            "csvw:value": "Northern Albania",
+                            "csvw:primaryKey": "eq005"
+                        }
+                    ]
+                },
+                {
+                    "csvw:name": "Magnitude",
+                    "csvw:datatype": "number",
+                    "csvw:cells": [
+                        {
+                            "csvw:value": "5.2",
+                            "csvw:primaryKey": "eq001"
+                        },
+                        {
+                            "csvw:value": "4.8",
+                            "csvw:primaryKey": "eq002"
+                        },
+                        {
+                            "csvw:value": "6.1",
+                            "csvw:primaryKey": "eq003"
+                        },
+                        {
+                            "csvw:value": "3.9",
+                            "csvw:primaryKey": "eq004"
+                        },
+                        {
+                            "csvw:value": "5.5",
+                            "csvw:primaryKey": "eq005"
+                        }
+                    ]
+                },
+                {
+                    "csvw:name": "Depth (km)",
+                    "csvw:datatype": "number",
+                    "csvw:cells": [
+                        {
+                            "csvw:value": "10.5",
+                            "csvw:primaryKey": "eq001"
+                        },
+                        {
+                            "csvw:value": "15.2",
+                            "csvw:primaryKey": "eq002"
+                        },
+                        {
+                            "csvw:value": "8.3",
+                            "csvw:primaryKey": "eq003"
+                        },
+                        {
+                            "csvw:value": "22.7",
+                            "csvw:primaryKey": "eq004"
+                        },
+                        {
+                            "csvw:value": "12.1",
+                            "csvw:primaryKey": "eq005"
+                        }
+                    ]
+                },
+                {
+                    "csvw:name": "Coordinates",
+                    "csvw:datatype": "string",
+                    "csvw:cells": [
+                        {
+                            "csvw:value": "42.8333, 13.1667",
+                            "csvw:notes": "Latitude, Longitude",
+                            "csvw:primaryKey": "eq001"
+                        },
+                        {
+                            "csvw:value": "38.2467, 21.7350",
+                            "csvw:notes": "Latitude, Longitude",
+                            "csvw:primaryKey": "eq002"
+                        },
+                        {
+                            "csvw:value": "37.0417, 37.3833",
+                            "csvw:notes": "Latitude, Longitude",
+                            "csvw:primaryKey": "eq003"
+                        },
+                        {
+                            "csvw:value": "45.6833, 26.6333",
+                            "csvw:notes": "Latitude, Longitude",
+                            "csvw:primaryKey": "eq004"
+                        },
+                        {
+                            "csvw:value": "41.3275, 19.8187",
+                            "csvw:notes": "Latitude, Longitude",
+                            "csvw:primaryKey": "eq005"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

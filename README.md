@@ -1,5 +1,11 @@
-# Publish to GitHub Pages from GitHub Actions
+# Metadata Explorer App
 
-See [Building and deploying a custom site using GitHub Actions and GitHub Pages](https://til.simonwillison.net/github-actions/github-pages) for an explanation of the pattern embodied by this repository template.
+A static page for exploring and analyzing metadata.
 
-You will need to access Settings -> Pages and set the "Build and Deployment" source to "GitHub Actions".
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## License
+
+See LICENSE file for details.
