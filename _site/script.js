@@ -44,6 +44,8 @@ function renderValue(val) {
 let jsonldData = null;
 
 function loadData(url) {
+    console.log('URL argument received:', url);
+
     const loadBtn = document.getElementById('load-data');
     const tableView = document.getElementById('dataset-table');
     const turtleView = document.getElementById('turtle-view');
@@ -76,8 +78,22 @@ function loadData(url) {
         });
 }
 
-// Load default data on page load
-loadData('https://raw.githubusercontent.com/atrakic/metadata-explorer.app/refs/heads/main/_site/data.jsonld');
+// Load default data on page load if URL is provided in input
+function initializeApp() {
+    const urlInput = document.getElementById('data-url');
+    const defaultUrl = urlInput ? urlInput.value.trim() : '';
+
+    if (defaultUrl) {
+        loadData(defaultUrl);
+    }
+}
+
+// Initialize app when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
 
 // Load button event listener
 document.getElementById('load-data').addEventListener('click', function () {
