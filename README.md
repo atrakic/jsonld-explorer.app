@@ -1,10 +1,6 @@
-# Metadata Explorer App
+# json-ld explorer app
 
-A static page for exploring and analyzing metadata.
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
+A simple html page for exploring data from [JSON-LD](https://json-ld.org/).
 
 ## License
 
