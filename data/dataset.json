@@ -38,7 +38,7 @@
         }
     ],
     "mainEntity": {
-        "@type": "csvw:Table",
+        "@type": "csvwTable",
         "csvw:tableSchema": {
             "csvw:columns": [
                 {
