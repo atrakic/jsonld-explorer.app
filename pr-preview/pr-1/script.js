@@ -64,6 +64,20 @@ function initializeDOMReferences() {
     urlInput = document.getElementById('data-url');
 
     // Setup event listeners after DOM references are cached
+    buttons.load.addEventListener('click', function () {
+        const url = urlInput.value.trim();
+        if (url) {
+            loadData(url);
+        }
+    });
+    urlInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const url = this.value.trim();
+            if (url) {
+                loadData(url);
+            }
+        }
+    });
     buttons.toggleTable.addEventListener('click', function () {
         showView('table');
     });
