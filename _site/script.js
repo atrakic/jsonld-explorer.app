@@ -235,18 +235,38 @@ function showView(format) {
         document.getElementById('dataset-table').style.display = 'block';
     } else if (format === 'turtle') {
         if (!formatCache.turtle) formatCache.turtle = jsonldToTurtle(jsonldData);
-        document.getElementById('turtle-view').innerHTML = `<pre>${formatCache.turtle}</pre>`;
+        const turtlePre = document.getElementById('turtle-view').querySelector('pre') || document.createElement('pre');
+        turtlePre.textContent = formatCache.turtle;
+        if (!document.getElementById('turtle-view').contains(turtlePre)) {
+            document.getElementById('turtle-view').innerHTML = '';
+            document.getElementById('turtle-view').appendChild(turtlePre);
+        }
         document.getElementById('turtle-view').style.display = 'block';
     } else if (format === 'rdfxml') {
         if (!formatCache.rdfxml) formatCache.rdfxml = turtleToRDF('rdfxml');
-        document.getElementById('rdfxml-view').innerHTML = `<pre>${formatCache.rdfxml}</pre>`;
+        const rdfxmlPre = document.getElementById('rdfxml-view').querySelector('pre') || document.createElement('pre');
+        rdfxmlPre.textContent = formatCache.rdfxml;
+        if (!document.getElementById('rdfxml-view').contains(rdfxmlPre)) {
+            document.getElementById('rdfxml-view').innerHTML = '';
+            document.getElementById('rdfxml-view').appendChild(rdfxmlPre);
+        }
         document.getElementById('rdfxml-view').style.display = 'block';
     } else if (format === 'ntriples') {
         if (!formatCache.ntriples) formatCache.ntriples = turtleToRDF('ntriples');
-        document.getElementById('ntriples-view').innerHTML = `<pre>${formatCache.ntriples}</pre>`;
+        const ntriplesPre = document.getElementById('ntriples-view').querySelector('pre') || document.createElement('pre');
+        ntriplesPre.textContent = formatCache.ntriples;
+        if (!document.getElementById('ntriples-view').contains(ntriplesPre)) {
+            document.getElementById('ntriples-view').innerHTML = '';
+            document.getElementById('ntriples-view').appendChild(ntriplesPre);
+        }
         document.getElementById('ntriples-view').style.display = 'block';
     } else if (format === 'nquads') {
-        document.getElementById('nquads-view').innerHTML = `<pre>Loading...</pre>`;
+        const nquadsPre = document.getElementById('nquads-view').querySelector('pre') || document.createElement('pre');
+        nquadsPre.textContent = 'Loading...';
+        if (!document.getElementById('nquads-view').contains(nquadsPre)) {
+            document.getElementById('nquads-view').innerHTML = '';
+            document.getElementById('nquads-view').appendChild(nquadsPre);
+        }
         jsonldToNQuads(jsonldData);
         document.getElementById('nquads-view').style.display = 'block';
     }
