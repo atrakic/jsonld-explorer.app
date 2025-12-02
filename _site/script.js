@@ -251,6 +251,7 @@ function turtleToRDF(format) {
     const store = $rdf.graph();
     const turtle = jsonldToTurtle(jsonldData);
     try {
+        console.log('Turtle:', turtle);
         $rdf.parse(turtle, store, 'http://example.org/', 'text/turtle');
         let mime = null;
         switch(format) {
