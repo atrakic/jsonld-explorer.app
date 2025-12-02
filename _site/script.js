@@ -38,6 +38,7 @@ function renderValue(val) {
 let jsonldData = null;
 let currentFormat = 'table';
 let formatCache = {};
+let nquadsRequestId = 0; // Track the latest N-Quads async request to avoid race conditions
 
 // Cached DOM element references for performance (initialized when DOM is ready)
 let views = null;
@@ -284,12 +285,26 @@ function showView(format) {
         views.ntriples.style.display = 'block';
     } else if (format === 'nquads') {
         const nquadsPre = views.nquads.querySelector('pre') || document.createElement('pre');
-        nquadsPre.textContent = 'Loading...';
         if (!views.nquads.contains(nquadsPre)) {
             views.nquads.innerHTML = '';
             views.nquads.appendChild(nquadsPre);
         }
-        jsonldToNQuads(jsonldData);
+        
+        if (formatCache.nquads) {
+            // Use cached result
+            nquadsPre.textContent = formatCache.nquads;
+        } else {
+            // Show loading and fetch asynchronously
+            nquadsPre.textContent = 'Loading...';
+            const requestId = ++nquadsRequestId;
+            jsonldToNQuads(jsonldData).then(result => {
+                // Only update DOM if this is still the latest request and nquads view is visible
+                if (requestId === nquadsRequestId && currentFormat === 'nquads') {
+                    formatCache.nquads = result;
+                    nquadsPre.textContent = result;
+                }
+            });
+        }
         views.nquads.style.display = 'block';
     }
 }
@@ -307,7 +322,7 @@ function downloadCurrent() {
         data = formatCache.ntriples;
         ext = 'nt';
     } else if (currentFormat === 'nquads') {
-        data = views.nquads.textContent;
+        data = formatCache.nquads;
         ext = 'nq';
     }
     if (!data) return;
