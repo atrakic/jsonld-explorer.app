@@ -11,9 +11,13 @@
         <input type="text" id="data-url" class="url-input" placeholder="Enter JSON-LD URL..." value="https://raw.githubusercontent.com/atrakic/jsonld-explorer.app/refs/heads/main/data/dataset.json">
         <button id="load-data" class="load-btn">Load Data</button>
         <button id="toggle-format" class="toggle-btn">Show Turtle Format</button>
+        <button id="toggle-rdfxml" class="toggle-btn">Show RDF/XML Format</button>
     </div>
     <div id="dataset-table">Loading...</div>
     <div id="turtle-view"></div>
+    <div id="rdfxml-view"></div>
     <script src="script.js"></script>
+    <script src="https://unpkg.com/rdflib@latest/dist/rdflib.min.js"></script>
+    <script src="https://unpkg.com/rdflib@latest/dist/rdflib.min.js"></script>
 </body>
 </html>
