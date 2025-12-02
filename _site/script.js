@@ -317,7 +317,10 @@ function downloadCurrent() {
         data = formatCache.ntriples;
         ext = 'nt';
     } else if (currentFormat === 'nquads') {
-        data = formatCache.nquads;
+        // Don't download if data is still loading or is an error message
+        if (formatCache.nquads && !formatCache.nquads.startsWith('Error') && !formatCache.nquads.startsWith('jsonld.js')) {
+            data = formatCache.nquads;
+        }
         ext = 'nq';
     }
     if (!data) return;
