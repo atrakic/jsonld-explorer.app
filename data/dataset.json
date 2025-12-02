@@ -39,7 +39,6 @@
     ],
     "mainEntity": {
         "@type": "csvw:Table",
-        "@id": "http://example.org/table1",
         "csvw:tableSchema": {
             "csvw:columns": [
                 {
