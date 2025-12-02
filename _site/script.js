@@ -1,4 +1,4 @@
-// --- Utility: Render values in HTML table ---
+// Utility: Render values in HTML table
 function linkify(str) {
     if (typeof str === "string" && str.match(/^(https?:\/\/[^\s]+)$/)) {
         return `<a href="${str}" target="_blank" rel="noopener">${str}</a>`;
@@ -36,29 +36,34 @@ function renderValue(val) {
     }
 }
 
-// --- App state ---
+// App state
 let jsonldData = null;
+let currentFormat = 'table';
+let formatCache = {};
 
-// --- Load JSON-LD and render table ---
+// Load JSON-LD and render table
 function loadData(url) {
-    console.log('URL argument received:', url);
-
     const loadBtn = document.getElementById('load-data');
     const tableView = document.getElementById('dataset-table');
     const turtleView = document.getElementById('turtle-view');
     const rdfxmlView = document.getElementById('rdfxml-view');
+    const ntriplesView = document.getElementById('ntriples-view');
+    const nquadsView = document.getElementById('nquads-view');
+    document.getElementById('download').style.display = 'none';
+
     loadBtn.disabled = true;
     loadBtn.textContent = 'Loading...';
     tableView.innerHTML = 'Loading...';
     turtleView.style.display = 'none';
     rdfxmlView.style.display = 'none';
-    document.getElementById('toggle-format').textContent = 'Show Turtle Format';
-    document.getElementById('toggle-rdfxml').textContent = 'Show RDF/XML Format';
+    ntriplesView.style.display = 'none';
+    nquadsView.style.display = 'none';
 
     fetch(url)
         .then(response => response.json())
         .then(data => {
             jsonldData = data;
+            formatCache = {}; // Reset cache
             let html = '<table>';
             html += '<thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>';
             Object.entries(data).forEach(([key, val]) => {
@@ -71,6 +76,10 @@ function loadData(url) {
             tableView.style.display = 'block';
             turtleView.style.display = 'none';
             rdfxmlView.style.display = 'none';
+            ntriplesView.style.display = 'none';
+            nquadsView.style.display = 'none';
+            currentFormat = 'table';
+            document.getElementById('download').style.display = 'none';
         })
         .catch(err => {
             tableView.textContent = 'Failed to load data! Check the URL and try again.';
@@ -80,7 +89,7 @@ function loadData(url) {
         });
 }
 
-// --- On page load, if a default URL is present ---
+// On page load, if a default URL is present
 function initializeApp() {
     const urlInput = document.getElementById('data-url');
     const defaultUrl = urlInput ? urlInput.value.trim() : '';
@@ -89,14 +98,13 @@ function initializeApp() {
     }
 }
 
-// Initialize app when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
     initializeApp();
 }
 
-// --- Load button event listener ---
+// UI events
 document.getElementById('load-data').addEventListener('click', function () {
     const url = document.getElementById('data-url').value.trim();
     if (url) {
@@ -104,7 +112,6 @@ document.getElementById('load-data').addEventListener('click', function () {
     }
 });
 
-// --- Enter key triggers loading ---
 document.getElementById('data-url').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         const url = this.value.trim();
@@ -114,22 +121,19 @@ document.getElementById('data-url').addEventListener('keypress', function (e) {
     }
 });
 
-// --- JSON-LD to Turtle ---
+// Conversion functions
 function jsonldToTurtle(data) {
     let turtle = '';
     const prefixes = {
         'schema': 'https://schema.org/',
         'csvw': 'https://www.w3.org/ns/csvw#'
     };
-    // Prefixes
     for (const [prefix, uri] of Object.entries(prefixes)) {
         turtle += `@prefix ${prefix}: <${uri}> .\n`;
     }
     turtle += '\n';
-    // Main subject
     const type = data['@type'] || 'Resource';
     turtle += `<> a schema:${type} ;\n`;
-    // Properties
     const props = [];
     for (const [key, value] of Object.entries(data)) {
         if (key === '@context' || key === '@type') continue;
@@ -141,7 +145,6 @@ function jsonldToTurtle(data) {
     return turtle;
 }
 
-// --- Format Turtle values ---
 function formatTurtleValue(value, indent = '') {
     if (typeof value === 'string') {
         if (value.startsWith('http://') || value.startsWith('https://')) {
@@ -172,74 +175,137 @@ function formatTurtleValue(value, indent = '') {
     return '""';
 }
 
-// --- Turtle to RDF/XML using rdflib.js ---
-function turtleToRDFXML(turtleText) {
+// RDFLib conversion (Turtle to RDF/XML/N-Triples)
+function turtleToRDF(format) {
     if (!window.$rdf) {
         return 'RDFLib not loaded!';
     }
     const $rdf = window.$rdf;
     const store = $rdf.graph();
+    const turtle = jsonldToTurtle(jsonldData);
     try {
-        $rdf.parse(turtleText, store, 'http://example.org/', 'text/turtle');
-        return $rdf.serialize(undefined, store, 'http://example.org/', 'application/rdf+xml');
+        $rdf.parse(turtle, store, 'http://example.org/', 'text/turtle');
+        let mime = null;
+        switch(format) {
+            case 'rdfxml':
+                mime = 'application/rdf+xml';
+                break;
+            case 'ntriples':
+                mime = 'application/n-triples';
+                break;
+            default:
+                return '';
+        }
+        return $rdf.serialize(undefined, store, 'http://example.org/', mime);
     } catch (e) {
-        return `Error converting to RDF/XML: ${e}`;
+        return `Error converting: ${e}`;
     }
 }
 
-// --- Button: Toggle Turtle View ---
-document.getElementById('toggle-format').addEventListener('click', function () {
-    const tableView = document.getElementById('dataset-table');
-    const turtleView = document.getElementById('turtle-view');
-    const rdfxmlView = document.getElementById('rdfxml-view');
-    const btn = this;
-
-    if (turtleView.style.display === 'none' || turtleView.style.display === '') {
-        // Show Turtle format
-        if (jsonldData) {
-            const turtleText = jsonldToTurtle(jsonldData);
-            turtleView.innerHTML = `<pre>${turtleText}</pre>`;
-        }
-        turtleView.style.display = 'block';
-        tableView.style.display = 'none';
-        rdfxmlView.style.display = 'none';
-        btn.textContent = 'Show Table Format';
-        document.getElementById('toggle-rdfxml').textContent = 'Show RDF/XML Format';
-    } else {
-        // Show table format
-        turtleView.style.display = 'none';
-        rdfxmlView.style.display = 'none';
-        tableView.style.display = 'block';
-        btn.textContent = 'Show Turtle Format';
-        document.getElementById('toggle-rdfxml').textContent = 'Show RDF/XML Format';
+// JSONLD.js: JSON-LD to N-Quads
+function jsonldToNQuads(data) {
+    if (!window.jsonld) {
+        return 'jsonld.js not loaded!';
     }
-});
+    window.jsonld.toRDF(data, { format: 'application/n-quads' })
+        .then(nquads => {
+            document.getElementById('nquads-view').innerHTML = `<pre>${nquads}</pre>`;
+        })
+        .catch(err => {
+            document.getElementById('nquads-view').innerHTML = `<pre>Error converting: ${err}</pre>`;
+        });
+}
 
-// --- Button: Toggle RDF/XML View ---
+// UI Toggles
+document.getElementById('toggle-table').addEventListener('click', function () {
+    showView('table');
+});
+document.getElementById('toggle-turtle').addEventListener('click', function () {
+    showView('turtle');
+});
 document.getElementById('toggle-rdfxml').addEventListener('click', function () {
-    const tableView = document.getElementById('dataset-table');
-    const turtleView = document.getElementById('turtle-view');
-    const rdfxmlView = document.getElementById('rdfxml-view');
-    const btn = this;
-
-    if (rdfxmlView.style.display === 'none' || rdfxmlView.style.display === '') {
-        // Show RDF/XML format
-        if (jsonldData) {
-            const turtleText = jsonldToTurtle(jsonldData);
-            const rdfxmlText = turtleToRDFXML(turtleText);
-            rdfxmlView.innerHTML = `<pre>${rdfxmlText}</pre>`;
-        }
-        rdfxmlView.style.display = 'block';
-        tableView.style.display = 'none';
-        turtleView.style.display = 'none';
-        btn.textContent = 'Show Table Format';
-        document.getElementById('toggle-format').textContent = 'Show Turtle Format';
-    } else {
-        // Show table format
-        rdfxmlView.style.display = 'none';
-        turtleView.style.display = 'none';
-        tableView.style.display = 'block';
-        btn.textContent = 'Show RDF/XML Format';
-        document.getElementById('toggle-format').textContent = 'Show Turtle Format';
-    }
+    showView('rdfxml');
 });
+document.getElementById('toggle-ntriples').addEventListener('click', function () {
+    showView('ntriples');
+});
+document.getElementById('toggle-nquads').addEventListener('click', function () {
+    showView('nquads');
+});
+document.getElementById('download').addEventListener('click', function () {
+    downloadCurrent();
+});
+
+function showView(format) {
+    if (!jsonldData) return;
+    document.getElementById('dataset-table').style.display = 'none';
+    document.getElementById('turtle-view').style.display = 'none';
+    document.getElementById('rdfxml-view').style.display = 'none';
+    document.getElementById('ntriples-view').style.display = 'none';
+    document.getElementById('nquads-view').style.display = 'none';
+
+    document.getElementById('download').style.display = format === 'table' ? 'none' : 'inline-block';
+    currentFormat = format;
+
+    if (format === 'table') {
+        document.getElementById('dataset-table').style.display = 'block';
+    } else if (format === 'turtle') {
+        if (!formatCache.turtle) formatCache.turtle = jsonldToTurtle(jsonldData);
+        document.getElementById('turtle-view').innerHTML = `<pre>${formatCache.turtle}</pre>`;
+        document.getElementById('turtle-view').style.display = 'block';
+    } else if (format === 'rdfxml') {
+        if (!formatCache.rdfxml) formatCache.rdfxml = turtleToRDF('rdfxml');
+        document.getElementById('rdfxml-view').innerHTML = `<pre>${formatCache.rdfxml}</pre>`;
+        document.getElementById('rdfxml-view').style.display = 'block';
+    } else if (format === 'ntriples') {
+        if (!formatCache.ntriples) formatCache.ntriples = turtleToRDF('ntriples');
+        document.getElementById('ntriples-view').innerHTML = `<pre>${formatCache.ntriples}</pre>`;
+        document.getElementById('ntriples-view').style.display = 'block';
+    } else if (format === 'nquads') {
+        document.getElementById('nquads-view').innerHTML = `<pre>Loading...</pre>`;
+        jsonldToNQuads(jsonldData);
+        document.getElementById('nquads-view').style.display = 'block';
+    }
+}
+
+function downloadCurrent() {
+    let data = '';
+    let ext = '';
+    if (currentFormat === 'turtle') {
+        data = formatCache.turtle;
+        ext = 'ttl';
+    } else if (currentFormat === 'rdfxml') {
+        data = formatCache.rdfxml;
+        ext = 'rdf';
+    } else if (currentFormat === 'ntriples') {
+        data = formatCache.ntriples;
+        ext = 'nt';
+    } else if (currentFormat === 'nquads') {
+        data = document.getElementById('nquads-view').textContent;
+        ext = 'nq';
+    }
+    if (!data) return;
+    const blob = new Blob([data], {type: "text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `export.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// On page load
+function initializeApp() {
+    const urlInput = document.getElementById('data-url');
+    const defaultUrl = urlInput ? urlInput.value.trim() : '';
+    if (defaultUrl) {
+        loadData(defaultUrl);
+    }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
