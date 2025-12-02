@@ -239,10 +239,16 @@ function jsonldToNQuads(data) {
     }
     window.jsonld.toRDF(data, { format: 'application/n-quads' })
         .then(nquads => {
-            views.nquads.innerHTML = `<pre>${nquads}</pre>`;
+            // Only update DOM if N-Quads view is still active
+            if (currentFormat === 'nquads') {
+                views.nquads.innerHTML = `<pre>${nquads}</pre>`;
+            }
         })
         .catch(err => {
-            views.nquads.innerHTML = `<pre>Error converting: ${err}</pre>`;
+            // Only update DOM if N-Quads view is still active
+            if (currentFormat === 'nquads') {
+                views.nquads.innerHTML = `<pre>Error converting: ${err}</pre>`;
+            }
         });
 }
 
