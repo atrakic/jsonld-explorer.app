@@ -144,6 +144,18 @@ function jsonldToTurtle(data) {
     return turtle;
 }
 
+// rdflib parses Turtle and serializes to RDF/XML 
+function turtleToRDFXML(turtleText) {
+    const $rdf = window.$rdf;
+    const store = $rdf.graph();
+    try {
+        $rdf.parse(turtleText, store, 'http://example.org/', 'text/turtle');
+        return $rdf.serialize(undefined, store, 'http://example.org/', 'application/rdf+xml');
+    } catch (e) {
+        return `Error converting to RDF/XML: ${e}`;
+    }
+}
+
 function formatTurtleValue(value, indent = '') {
     if (typeof value === 'string') {
         if (value.startsWith('http://') || value.startsWith('https://')) {
@@ -194,5 +206,31 @@ document.getElementById('toggle-format').addEventListener('click', function () {
         turtleView.style.display = 'none';
         tableView.style.display = 'block';
         btn.textContent = 'Show Turtle Format';
+    }
+});
+
+document.getElementById('toggle-rdfxml').addEventListener('click', function () {
+    const tableView = document.getElementById('dataset-table');
+    const turtleView = document.getElementById('turtle-view');
+    const rdfxmlView = document.getElementById('rdfxml-view');
+    const btn = this;
+
+    if (rdfxmlView.style.display === 'none' || rdfxmlView.style.display === '') {
+        // Show RDF/XML format
+        if (jsonldData) {
+            const turtleText = jsonldToTurtle(jsonldData);
+            const rdfxmlText = turtleToRDFXML(turtleText);
+            rdfxmlView.innerHTML = `<pre>${rdfxmlText}</pre>`;
+        }
+        rdfxmlView.style.display = 'block';
+        tableView.style.display = 'none';
+        turtleView.style.display = 'none';
+        btn.textContent = 'Show Table Format';
+    } else {
+        // Show table format
+        rdfxmlView.style.display = 'none';
+        turtleView.style.display = 'none';
+        tableView.style.display = 'block';
+        btn.textContent = 'Show RDF/XML Format';
     }
 });
