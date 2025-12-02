@@ -284,12 +284,22 @@ function showView(format) {
         views.ntriples.style.display = 'block';
     } else if (format === 'nquads') {
         const nquadsPre = views.nquads.querySelector('pre') || document.createElement('pre');
-        nquadsPre.textContent = 'Loading...';
         if (!views.nquads.contains(nquadsPre)) {
             views.nquads.innerHTML = '';
             views.nquads.appendChild(nquadsPre);
         }
-        jsonldToNQuads(jsonldData);
+        if (formatCache.nquads) {
+            nquadsPre.textContent = formatCache.nquads;
+        } else {
+            nquadsPre.textContent = 'Loading...';
+            jsonldToNQuads(jsonldData).then(nquads => {
+                formatCache.nquads = nquads;
+                // Only update if still on nquads view to prevent visual glitches
+                if (currentFormat === 'nquads') {
+                    nquadsPre.textContent = nquads;
+                }
+            });
+        }
         views.nquads.style.display = 'block';
     }
 }
@@ -307,7 +317,7 @@ function downloadCurrent() {
         data = formatCache.ntriples;
         ext = 'nt';
     } else if (currentFormat === 'nquads') {
-        data = views.nquads.textContent;
+        data = formatCache.nquads;
         ext = 'nq';
     }
     if (!data) return;
