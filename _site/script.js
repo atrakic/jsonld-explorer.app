@@ -284,12 +284,30 @@ function showView(format) {
         views.ntriples.style.display = 'block';
     } else if (format === 'nquads') {
         const nquadsPre = views.nquads.querySelector('pre') || document.createElement('pre');
-        nquadsPre.textContent = 'Loading...';
         if (!views.nquads.contains(nquadsPre)) {
             views.nquads.innerHTML = '';
             views.nquads.appendChild(nquadsPre);
         }
-        jsonldToNQuads(jsonldData);
+        if (formatCache.nquads) {
+            nquadsPre.textContent = formatCache.nquads;
+        } else {
+            nquadsPre.textContent = 'Loading...';
+            jsonldToNQuads(jsonldData)
+                .then(nquads => {
+                    formatCache.nquads = nquads;
+                    // Only update if still on nquads view to prevent visual glitches
+                    if (currentFormat === 'nquads') {
+                        nquadsPre.textContent = nquads;
+                    }
+                })
+                .catch(err => {
+                    const errorMsg = `Error converting: ${err}`;
+                    formatCache.nquads = errorMsg;
+                    if (currentFormat === 'nquads') {
+                        nquadsPre.textContent = errorMsg;
+                    }
+                });
+        }
         views.nquads.style.display = 'block';
     }
 }
@@ -307,7 +325,10 @@ function downloadCurrent() {
         data = formatCache.ntriples;
         ext = 'nt';
     } else if (currentFormat === 'nquads') {
-        data = views.nquads.textContent;
+        // Don't download if data is still loading or is an error message
+        if (formatCache.nquads && !formatCache.nquads.startsWith('Error') && !formatCache.nquads.startsWith('jsonld.js')) {
+            data = formatCache.nquads;
+        }
         ext = 'nq';
     }
     if (!data) return;
